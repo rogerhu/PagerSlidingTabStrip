@@ -344,8 +344,16 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 		// draw divider
 
 		dividerPaint.setColor(dividerColor);
-		for (int i = 0; i < tabCount - 1; i++) {
+		for (int i = 0; i < tabCount; i++) {
 			View tab = tabsContainer.getChildAt(i);
+
+            // set item to be selected
+            if (tab == currentTab) {
+                tab.setSelected(true);
+            } else {
+                tab.setSelected(false);
+            }
+
 			canvas.drawLine(tab.getRight(), dividerPadding, tab.getRight(), height - dividerPadding, dividerPaint);
 		}
 	}
