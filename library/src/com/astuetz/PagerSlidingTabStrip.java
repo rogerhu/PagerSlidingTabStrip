@@ -16,6 +16,8 @@
 
 package com.astuetz;
 
+import com.astuetz.pagerslidingtabstrip.R;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -26,8 +28,10 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -40,8 +44,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Locale;
-
-import com.astuetz.pagerslidingtabstrip.R;
 
 public class PagerSlidingTabStrip extends HorizontalScrollView {
 
@@ -194,12 +196,21 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 
 		for (int i = 0; i < tabCount; i++) {
 
-			if (pager.getAdapter() instanceof IconTabProvider) {
-				addIconTab(i, ((IconTabProvider) pager.getAdapter()).getPageIconResId(i));
-			} else {
-				addTextTab(i, pager.getAdapter().getPageTitle(i).toString());
-			}
+                    PagerAdapter pagerAdapter = pager.getAdapter();
+                    String title = pagerAdapter.getPageTitle(i).toString();
 
+		     if (pagerAdapter instanceof IconTabProvider) {
+
+                         int resId = ((IconTabProvider) pagerAdapter).getPageIconResId(i);
+                         // Only add icon tab if the title is empty.  Otherwise, make a TextView with a left drawable.
+                         if(TextUtils.isEmpty(title)) {
+                             addIconTab(i, resId);
+                         } else {
+                             addTextIconTab(i, title, resId);
+                         }
+                     } else {
+                         addTextTab(i, title);
+                     }
 		}
 
 		updateTabStyles();
@@ -224,7 +235,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 
 	}
 
-	private void addTextTab(final int position, String title) {
+	private TextView addTextTab(final int position, String title) {
 
 		TextView tab = new TextView(getContext());
 		tab.setText(title);
@@ -232,16 +243,19 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 		tab.setSingleLine();
 
 		addTab(position, tab);
+                return tab;
 	}
+
+        private void addTextIconTab(final int position, String title, int resId) {
+            TextView tab = addTextTab(position, title);
+            tab.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(resId), null,
+                    null, null);
+        }
 
 	private void addIconTab(final int position, int resId) {
-
-		ImageButton tab = new ImageButton(getContext());
-		tab.setImageResource(resId);
-
-		addTab(position, tab);
-
-	}
+            ImageButton tab = new ImageButton(getContext());
+            tab.setImageResource(resId);
+        }
 
 	private void addTab(final int position, View tab) {
 		tab.setFocusable(true);
